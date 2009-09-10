@@ -64,7 +64,7 @@ void ObjList::ClearUndoably(void)
 	for (It=objects_to_delete.begin();It!=objects_to_delete.end();It++)
 	{
 #ifdef HEEKSCAD
-		wxGetApp().DeleteUndoably(*It);
+		wxGetApp().Remove(*It);
 #else
 		heeksCAD->DeleteUndoably(*It);
 #endif
@@ -165,6 +165,24 @@ HeeksObj* ObjList::GetAtIndex(int index)
 int ObjList::GetNumChildren()
 {
 	return m_objects.size();
+}
+
+void ObjList::Add(std::list<HeeksObj*> objects)
+{
+	std::list<HeeksObj*>::iterator it;
+	for(it = objects.begin(); it != objects.end(); it++)
+	{
+		Add(*it,NULL);
+	}
+}
+
+void ObjList::Remove(std::list<HeeksObj*> objects)
+{
+	std::list<HeeksObj*>::iterator it;
+	for(it = objects.begin(); it != objects.end(); it++)
+	{
+		Remove(*it);
+	}
 }
 
 bool ObjList::Add(HeeksObj* object, HeeksObj* prev_object)

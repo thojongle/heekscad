@@ -48,7 +48,6 @@
 #include "HText.h"
 #include "HDimension.h"
 #include "HXml.h"
-#include "RemoveOrAddTool.h"
 #include "Sketch.h"
 #include "BezierCurve.h"
 #include "StlSolid.h"
@@ -397,16 +396,13 @@ bool HeeksCADapp::EndSketchMode()
 	return false;
 }
 
-CSketch* HeeksCADapp::GetContainer(bool undoably)
+CSketch* HeeksCADapp::GetContainer()
 {
 	if(m_sketch_mode)
 		return m_sketch;
 
 	m_sketch = new CSketch();
-	if(undoably)
-		AddUndoably(m_sketch,NULL,NULL);
-	else
-		Add(m_sketch,NULL);
+	Add(m_sketch,NULL);
 	return m_sketch;
 }
 
@@ -497,7 +493,6 @@ void HeeksCADapp::Reset(){
 	ResetIDs();
 }
 
-static bool undoably_for_ReadSTEPFileFromXMLElement = false;
 static HeeksObj* paste_into_for_ReadSTEPFileFromXMLElement = NULL;
 
 static HeeksObj* ReadSTEPFileFromXMLElement(TiXmlElement* pElem)
@@ -571,7 +566,7 @@ static HeeksObj* ReadSTEPFileFromXMLElement(TiXmlElement* pElem)
 #endif
 					ofs<<file_text;
 				}
-				CShape::ImportSolidsFile(temp_file, undoably_for_ReadSTEPFileFromXMLElement, &index_map, paste_into_for_ReadSTEPFileFromXMLElement);
+				CShape::ImportSolidsFile(temp_file, &index_map, paste_into_for_ReadSTEPFileFromXMLElement);
 			}
 		}
 	}
@@ -593,7 +588,7 @@ static HeeksObj* ReadSTEPFileFromXMLElement(TiXmlElement* pElem)
 #endif
 				ofs<<a->Value();
 			}
-			CShape::ImportSolidsFile(temp_file, undoably_for_ReadSTEPFileFromXMLElement, &index_map, paste_into_for_ReadSTEPFileFromXMLElement);
+			CShape::ImportSolidsFile(temp_file,&index_map, paste_into_for_ReadSTEPFileFromXMLElement);
 		}
 	}
 
@@ -668,7 +663,7 @@ void HeeksCADapp::ObjectReadBaseXML(HeeksObj *object, TiXmlElement* element)
 	}
 }
 
-void HeeksCADapp::OpenXMLFile(const wxChar *filepath, bool undoably, HeeksObj* paste_into)
+void HeeksCADapp::OpenXMLFile(const wxChar *filepath, HeeksObj* paste_into)
 {
 	TiXmlDocument doc(Ttc(filepath));
 	if (!doc.LoadFile())
@@ -680,7 +675,6 @@ void HeeksCADapp::OpenXMLFile(const wxChar *filepath, bool undoably, HeeksObj* p
 		return;
 	}
 
-	undoably_for_ReadSTEPFileFromXMLElement = undoably;
 	paste_into_for_ReadSTEPFileFromXMLElement = paste_into;
 
 	TiXmlHandle hDoc(&doc);
@@ -711,7 +705,7 @@ void HeeksCADapp::OpenXMLFile(const wxChar *filepath, bool undoably, HeeksObj* p
 			HeeksObj* object = *It;
 			if(add_to->CanAdd(object) && object->CanAddTo(add_to))
 			{
-				if(undoably && object->OneOfAKind())
+				if(object->OneOfAKind())
 				{
 					bool one_found = false;
 					for(HeeksObj* child = add_to->GetFirstChild(); child; child = add_to->GetNextChild())
@@ -723,45 +717,43 @@ void HeeksCADapp::OpenXMLFile(const wxChar *filepath, bool undoably, HeeksObj* p
 							break;
 						}
 					}
-					if(!one_found)AddUndoably(object, add_to, NULL);
+					if(!one_found)add_to->Add(object, NULL);
 				}
 				else
 				{
-					if(undoably)AddUndoably(object, add_to, NULL);
-					else add_to->Add(object, NULL);
+					add_to->Add(object, NULL);
 				}
 			}
 		}
 	}
 
-	CGroup::MoveSolidsToGroupsById(this, undoably);
+	CGroup::MoveSolidsToGroupsById(this);
 }
 
-void HeeksCADapp::OpenSVGFile(const wxChar *filepath, bool undoably)
+void HeeksCADapp::OpenSVGFile(const wxChar *filepath)
 {
-	HeeksSvgRead svgread(filepath,undoably,true);
+	HeeksSvgRead svgread(filepath,true);
 }
 
-void HeeksCADapp::OpenSTLFile(const wxChar *filepath, bool undoably)
+void HeeksCADapp::OpenSTLFile(const wxChar *filepath)
 {
 	CStlSolid* new_object = new CStlSolid(filepath, &current_color);
-	if(undoably)AddUndoably(new_object, this, NULL);
-	else Add(new_object, NULL);
+	Add(new_object, NULL);
 }
 
-void HeeksCADapp::OpenDXFFile(const wxChar *filepath, bool undoably)
+void HeeksCADapp::OpenDXFFile(const wxChar *filepath )
 {
 	HeeksDxfRead dxf_file(filepath);
-	dxf_file.DoRead(undoably);
+	dxf_file.DoRead();
 }
 
-void HeeksCADapp::OpenRS274XFile(const wxChar *filepath, bool undoably)
+void HeeksCADapp::OpenRS274XFile(const wxChar *filepath)
 {
 	RS274X gerber;
-	gerber.Read(wxString(filepath).mb_str(), undoably);
+	gerber.Read(wxString(filepath).mb_str());
 }
 
-bool HeeksCADapp::OpenImageFile(const wxChar *filepath, bool undoably)
+bool HeeksCADapp::OpenImageFile(const wxChar *filepath)
 {
 	wxString wf(filepath);
 	wf.LowerCase();
@@ -774,8 +766,7 @@ bool HeeksCADapp::OpenImageFile(const wxChar *filepath, bool undoably)
 		if(wf.EndsWith(ext))
 		{
 			HImage* new_object = new HImage(filepath);
-			if(undoably)AddUndoably(new_object, NULL, NULL);
-			else Add(new_object, NULL);
+			Add(new_object, NULL);
 			Repaint();
 			return true;
 		}
@@ -802,34 +793,34 @@ bool HeeksCADapp::OpenFile(const wxChar *filepath, bool import_not_open, HeeksOb
 		m_file_open_or_import_type = FileOpenTypeHeeks;
 		if(import_not_open)
 			m_file_open_or_import_type = FileImportTypeHeeks;
-		OpenXMLFile(filepath, import_not_open, paste_into);
+		OpenXMLFile(filepath, paste_into);
 	}
 	else if(wf.EndsWith(_T(".svg")) || wf.EndsWith(_T(".SVG")))
 	{
-		OpenSVGFile(filepath, import_not_open);
+		OpenSVGFile(filepath);
 	}
 	else if(wf.EndsWith(_T(".stl")) || wf.EndsWith(_T(".STL")))
 	{
-		OpenSTLFile(filepath, import_not_open);
+		OpenSTLFile(filepath);
 	}
 	else if(wf.EndsWith(_T(".dxf")) || wf.EndsWith(_T(".DXF")))
 	{
 		m_file_open_or_import_type = FileOpenOrImportTypeDxf;
-		OpenDXFFile(filepath, import_not_open);
+		OpenDXFFile(filepath);
 	}
 	else if(wf.EndsWith(_T(".gbr")) || wf.EndsWith(_T(".GBR"))
 			|| wf.EndsWith(_T(".rs274x")) || wf.EndsWith(_T(".RS274X")))
 	{
-		OpenRS274XFile(filepath, import_not_open);
+		OpenRS274XFile(filepath);
 	}
 
 	// check for images
-	else if(OpenImageFile(filepath, import_not_open))
+	else if(OpenImageFile(filepath))
 	{
 	}
 
 	// check for solid files
-	else if(CShape::ImportSolidsFile(filepath, import_not_open))
+	else if(CShape::ImportSolidsFile(filepath))
 	{
 	}
 	else
@@ -1583,55 +1574,27 @@ bool HeeksCADapp::Add(HeeksObj *object, HeeksObj* prev_object)
 
 void HeeksCADapp::Remove(HeeksObj* object)
 {
+	if(object->Owner() != this)
+	{
+		object->Owner()->Remove(object);
+		return;
+	}
 	ObjList::Remove(object);
 	if(object == m_current_coordinate_system)m_current_coordinate_system = NULL;
 }
 
-void HeeksCADapp::DeleteUndoably(HeeksObj *object){
-	if(object == NULL)return;
-	if(!object->CanBeRemoved())return;
-	RemoveObjectTool *tool = new RemoveObjectTool(object);
-	StartHistory();
-	DoToolUndoably(tool);
-	EndHistory();
+void HeeksCADapp::Remove(std::list<HeeksObj*> objects)
+{
+	ObjList::Remove(objects);
 }
 
-void HeeksCADapp::DeleteUndoably(const std::list<HeeksObj*>& list)
+void HeeksCADapp::Transform(std::list<HeeksObj*> objects,double *m)
 {
-	if(list.size() == 0)return;
-	std::list<HeeksObj*> list2;
-	for(std::list<HeeksObj*>::const_iterator It = list.begin(); It != list.end(); It++)
+	std::list<HeeksObj*>::iterator it;
+	for(it = objects.begin(); it!= objects.end(); ++it)
 	{
-		HeeksObj* object = *It;
-		if(object->CanBeRemoved())list2.push_back(object);
+		(*it)->ModifyByMatrix(m);
 	}
-	if(list2.size() == 0)return;
-	RemoveObjectsTool *tool = new RemoveObjectsTool(list2, list2.front()->Owner());
-	DoToolUndoably(tool);
-}
-
-void HeeksCADapp::TransformUndoably(HeeksObj *object, double *m)
-{
-	if(!object)return;
-	gp_Trsf mat = make_matrix(m);
-	gp_Trsf im = mat;
-	im.Invert();
-	StartHistory(); // the following action might do add and remove, so needs to be in a group
-	TransformTool *tool = new TransformTool(object, mat, im);
-	DoToolUndoably(tool);
-	EndHistory();
-}
-
-void HeeksCADapp::TransformUndoably(const std::list<HeeksObj*> &list, double *m)
-{
-	if(list.size() == 0)return;
-	gp_Trsf mat = make_matrix(m);
-	gp_Trsf im = mat;
-	im.Invert();
-	StartHistory(); // the following action might do add and remove, so needs to be in a group
-	TransformObjectsTool *tool = new TransformObjectsTool(list, mat, im);
-	DoToolUndoably(tool);
-	EndHistory();
 }
 
 void HeeksCADapp::WasModified(HeeksObj *object)
@@ -2024,6 +1987,10 @@ void on_sel_filter_ruler(bool value, HeeksObj* object){
 	if(value)wxGetApp().m_marked_list->m_filter |= MARKING_FILTER_RULER;
 	else wxGetApp().m_marked_list->m_filter &= ~MARKING_FILTER_RULER;
 }
+void on_sel_filter_pad(bool value, HeeksObj* object){
+	if(value)wxGetApp().m_marked_list->m_filter |= MARKING_FILTER_PAD;
+	else wxGetApp().m_marked_list->m_filter &= ~MARKING_FILTER_PAD;
+}
 
 void on_dxf_make_sketch(bool value, HeeksObj* object){
 	HeeksDxfRead::m_make_as_sketch = value;
@@ -2164,6 +2131,7 @@ void HeeksCADapp::GetOptions(std::list<Property *> *list)
 	selection_filter->m_list.push_back(new PropertyCheck(_("text"), (m_marked_list->m_filter & MARKING_FILTER_TEXT) != 0, NULL, on_sel_filter_text));
 	selection_filter->m_list.push_back(new PropertyCheck(_("dimension"), (m_marked_list->m_filter & MARKING_FILTER_DIMENSION) != 0, NULL, on_sel_filter_dimension));
 	selection_filter->m_list.push_back(new PropertyCheck(_("ruler"), (m_marked_list->m_filter & MARKING_FILTER_RULER) != 0, NULL, on_sel_filter_ruler));
+	selection_filter->m_list.push_back(new PropertyCheck(_("pad"), (m_marked_list->m_filter & MARKING_FILTER_PAD) != 0, NULL, on_sel_filter_pad));
 	list->push_back(selection_filter);
 
 	PropertyList* file_options = new PropertyList(_("file options"));
@@ -2181,32 +2149,12 @@ void HeeksCADapp::DeleteMarkedItems()
 	m_marked_list->Clear(false);
 
 	if(list.size() == 1){
-		DeleteUndoably(*(list.begin()));
+		Remove(*(list.begin()));
 	}
 	else if(list.size()>1){
-		StartHistory();
-		DeleteUndoably(list);
-		EndHistory();
+		Remove(list);
 	}
 	Repaint(0);
-}
-
-void HeeksCADapp::AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object)
-{
-	if(object == NULL)return;
-	if(owner == NULL)owner = this;
-	AddObjectTool *tool = new AddObjectTool(object, owner, prev_object);
-	StartHistory();
-	DoToolUndoably(tool);
-	EndHistory();
-}
-
-void HeeksCADapp::AddUndoably(const std::list<HeeksObj*> &list, HeeksObj* owner)
-{
-	if(list.size() == 0)return;
-	if(owner == NULL)owner = this;
-	AddObjectsTool *tool = new AddObjectsTool(list, owner);
-	DoToolUndoably(tool);
 }
 
 void HeeksCADapp::glColorEnsuringContrast(const HeeksColor &c)
@@ -2330,7 +2278,8 @@ void HeeksCADapp::GetTools(MarkedObject* marked_object, std::list<Tool*>& t_list
 		marked_object->GetObject()->GetTools(&tools, &point);
 		if(tools.size() > 0)tools.push_back(NULL);
 
-		if(marked_object->GetObject()->CanBeRemoved())tools.push_back(new RemoveObjectTool(marked_object->GetObject()));
+		//TODO: this is the only useful thing removeobjecttool ever did
+		//if(marked_object->GetObject()->CanBeRemoved())tools.push_back(new RemoveObjectTool(marked_object->GetObject()));
 
 		tools.push_back(NULL);
 

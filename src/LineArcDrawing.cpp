@@ -519,7 +519,7 @@ HeeksObj* LineArcDrawing::GetOwnerForDrawingObjects()
 			{
 				if(m_container == NULL)
 				{
-					m_container = wxGetApp().GetContainer(true);
+					m_container = wxGetApp().GetContainer();
 				}
 				return m_container;
 			}
@@ -530,7 +530,7 @@ HeeksObj* LineArcDrawing::GetOwnerForDrawingObjects()
 	}
 	if(wxGetApp().m_sketch_mode)
 	{
-		m_container = wxGetApp().GetContainer(true);
+		m_container = wxGetApp().GetContainer();
 		return m_container;
 	}
 	return NULL;

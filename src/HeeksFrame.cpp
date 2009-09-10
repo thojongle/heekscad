@@ -531,7 +531,7 @@ static void OnTextButton( wxCommandEvent& WXUNUSED( event ) )
 {
 	gp_Trsf mat = wxGetApp().GetDrawMatrix(true);
 	HText* new_object = new HText(mat, _T("text"), &(wxGetApp().current_color));
-	wxGetApp().AddUndoably(new_object, NULL, NULL);
+	wxGetApp().Add(new_object, NULL);
 	wxGetApp().m_marked_list->Clear(true);
 	wxGetApp().m_marked_list->Add(new_object, true);
 	wxGetApp().SetInputMode(wxGetApp().m_select_mode);
@@ -579,7 +579,7 @@ static void OnCoordinateSystem( wxCommandEvent& WXUNUSED( event ) )
 	gp_Dir x = gp_Dir(1, 0, 0).Transformed(mat);
 	gp_Dir y = gp_Dir(0, 1, 0).Transformed(mat);
 	CoordinateSystem* new_object = new CoordinateSystem(_("Coordinate System"), o, x, y);
-	wxGetApp().AddUndoably(new_object, NULL, NULL);
+	wxGetApp().Add(new_object, NULL);
 	wxGetApp().m_marked_list->Clear(true);
 	wxGetApp().m_marked_list->Add(new_object, true);
 	wxGetApp().SetInputMode(wxGetApp().m_select_mode);
@@ -673,7 +673,7 @@ static void OnPasteButton( wxCommandEvent& event )
 
 static void OnDeleteButton( wxCommandEvent& event )
 {
-	wxGetApp().DeleteUndoably(wxGetApp().m_marked_list->list());
+	wxGetApp().Remove(wxGetApp().m_marked_list->list());
 }
 
 static void OnUpdateDelete( wxUpdateUIEvent& event )
@@ -746,7 +746,7 @@ static void OnSphereButton( wxCommandEvent& event )
 {
 	gp_Trsf mat = wxGetApp().GetDrawMatrix(true);
 	CSphere* new_object = new CSphere(gp_Pnt(0, 0, 0).Transformed(mat), 5, _("Sphere"), HeeksColor(240, 191, 191));
-	wxGetApp().AddUndoably(new_object, NULL, NULL);
+	wxGetApp().Add(new_object,NULL);
 	wxGetApp().m_marked_list->Clear(true);
 	wxGetApp().m_marked_list->Add(new_object, true);
 	wxGetApp().SetInputMode(wxGetApp().m_select_mode);
@@ -757,7 +757,7 @@ static void OnCubeButton( wxCommandEvent& event )
 {
 	gp_Trsf mat = wxGetApp().GetDrawMatrix(false);
 	CCuboid* new_object = new CCuboid(gp_Ax2(gp_Pnt(0, 0, 0).Transformed(mat), gp_Dir(0, 0, 1).Transformed(mat), gp_Dir(1, 0, 0).Transformed(mat)), 10, 10, 10, _("Cuboid"), HeeksColor(191, 240, 191));
-	wxGetApp().AddUndoably(new_object, NULL, NULL);
+	wxGetApp().Add(new_object, NULL);
 	wxGetApp().m_marked_list->Clear(true);
 	wxGetApp().m_marked_list->Add(new_object, true);
 	wxGetApp().SetInputMode(wxGetApp().m_select_mode);
@@ -768,7 +768,7 @@ static void OnCylButton( wxCommandEvent& event )
 {
 	gp_Trsf mat = wxGetApp().GetDrawMatrix(true);
 	CCylinder* new_object = new CCylinder(gp_Ax2(gp_Pnt(0, 0, 0).Transformed(mat), gp_Dir(0, 0, 1).Transformed(mat), gp_Dir(1, 0, 0).Transformed(mat)), 5, 10, _("Cylinder"), HeeksColor(191, 191, 240));
-	wxGetApp().AddUndoably(new_object, NULL, NULL);
+	wxGetApp().Add(new_object, NULL);
 	wxGetApp().m_marked_list->Clear(true);
 	wxGetApp().m_marked_list->Add(new_object, true);
 	wxGetApp().SetInputMode(wxGetApp().m_select_mode);
@@ -779,7 +779,7 @@ static void OnConeButton( wxCommandEvent& event )
 {
 	gp_Trsf mat = wxGetApp().GetDrawMatrix(true);
 	CCone* new_object = new CCone(gp_Ax2(gp_Pnt(0, 0, 0).Transformed(mat), gp_Dir(0, 0, 1).Transformed(mat), gp_Dir(1, 0, 0).Transformed(mat)), 10, 5, 20, _("Cone"), HeeksColor(240, 240, 191));
-	wxGetApp().AddUndoably(new_object, NULL, NULL);
+	wxGetApp().Add(new_object, NULL);
 	wxGetApp().m_marked_list->Clear(true);
 	wxGetApp().m_marked_list->Add(new_object, true);
 	wxGetApp().SetInputMode(wxGetApp().m_select_mode);

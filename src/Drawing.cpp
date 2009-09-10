@@ -63,7 +63,7 @@ void Drawing::AddPoint()
 		if(calculated){
 			before_add_item();
 			const std::list<HeeksObj*>& drawing_objects = GetObjectsMade();
-			wxGetApp().AddUndoably(drawing_objects, GetOwnerForDrawingObjects());
+			((ObjList*)GetOwnerForDrawingObjects())->Add(drawing_objects);
 			if(DragDoneWithXOR())wxGetApp().m_frame->m_graphics->DrawObjectsOnFront(drawing_objects, true);
 			else wxGetApp().Repaint();
 			set_previous_direction();

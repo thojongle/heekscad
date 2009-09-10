@@ -109,18 +109,16 @@ void GripperSelTransform::OnGripperReleased ( const double* from, const double* 
 		MakeMatrix ( from, to, object_m, mat );
 		double m[16];
 		extract(mat, m );
-		wxGetApp().StartHistory();
 		std::list<HeeksObj *>::iterator It;
 		for ( It = m_items_marked_at_grab.begin(); It != m_items_marked_at_grab.end(); It++ )
 		{
 			HeeksObj* object = *It;
-			wxGetApp().TransformUndoably( object, m );
+			object->ModifyByMatrix(m);
 			if(wxGetApp().autosolve_constraints && (dynamic_cast<ConstrainedObject*>(object)))
 			{
 				SolveSketch((CSketch*)object->Owner(),object,object);
 			}
 		}
-		wxGetApp().EndHistory();
 	}
 
 	m_items_marked_at_grab.clear();

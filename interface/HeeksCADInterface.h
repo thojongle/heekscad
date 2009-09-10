@@ -96,9 +96,9 @@ public:
 	virtual HeeksObj* NewSphere(const double*pos, double radius);    
 	virtual HeeksObj* NewGroup();
 	virtual HeeksObj* NewSolid(const TopoDS_Solid &solid, const wxChar* title, const HeeksColor& col);
-	virtual HeeksObj* Fuse(const std::list<HeeksObj*> objects);
-	virtual HeeksObj* Cut(const std::list<HeeksObj*> objects);
-	virtual HeeksObj* Common(const std::list<HeeksObj*> objects);    
+	virtual HeeksObj* Fuse(std::list<HeeksObj*> objects);
+	virtual HeeksObj* Cut(std::list<HeeksObj*> objects);
+	virtual HeeksObj* Common(std::list<HeeksObj*> objects);    
 	virtual void RotateObject(HeeksObj*, const double*p,const double*u,double r);
 	virtual void TranslateObject(HeeksObj*,const double* c);
 	virtual void RegisterObserver(Observer* observer);
@@ -107,7 +107,7 @@ public:
 	virtual void RegisterHideableWindow(wxWindow* w);
 	virtual HeeksObj* ReadXMLElement(TiXmlElement* pElem);
 	virtual void RegisterReadXMLfunction(const char* type_name, HeeksObj*(*read_xml_function)(TiXmlElement* pElem));
-	virtual void OpenXMLFile(const wxChar *filepath, bool undoably = false, HeeksObj* paste_into = NULL);
+	virtual void OpenXMLFile(const wxChar *filepath, HeeksObj* paste_into = NULL);
 	virtual void ObjectWriteBaseXML(HeeksObj* object, TiXmlElement* element);
 	virtual void ObjectReadBaseXML(HeeksObj* object, TiXmlElement* element);
 	virtual HeeksObj* GetIDObject(int type, int id);
@@ -124,7 +124,7 @@ public:
 
 	// sketches
 	virtual SketchOrderType GetSketchOrder(HeeksObj* sketch);
-	virtual bool ReOrderSketch(HeeksObj* sketch, SketchOrderType new_order, bool undoably); // returns true if done
+	virtual bool ReOrderSketch(HeeksObj* sketch, SketchOrderType new_order); // returns true if done
 	virtual void ExtractSeparateSketches(HeeksObj* sketch, std::list<HeeksObj*> &new_separate_sketches);
 	virtual HeeksObj* ExtrudeSketch(HeeksObj* sketch, double height);
 	virtual HeeksObj* LineArcsToWire(std::list<HeeksObj*> list);

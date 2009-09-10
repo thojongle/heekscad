@@ -68,6 +68,7 @@ enum{
 #define MARKING_FILTER_RULER				0x00004000
 #define MARKING_FILTER_LOOP					0x00008000
 #define MARKING_FILTER_VERTEX				0x00010000
+#define MARKING_FILTER_PAD					0x00020000
 
 class HeeksObj{
 	std::list<HeeksObj*> m_owners;

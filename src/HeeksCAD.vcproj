@@ -1320,14 +1320,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\RemoveOrAddTool.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\RemoveOrAddTool.h"
-			>
-		</File>
-		<File
 			RelativePath=".\RS274X.cpp"
 			>
 		</File>

@@ -153,9 +153,9 @@ bool CCone::ModifyByMatrix(const double *m){
 	double new_height = fabs(m_height * scale);
 	CCone* new_object = new CCone(new_pos, new_r1, new_r2, new_height, m_title.c_str(), m_color);
 	new_object->CopyIDsFrom(this);
-	wxGetApp().AddUndoably(new_object, Owner(), NULL);
+	Owner()->Add(new_object, NULL);
 	if(wxGetApp().m_marked_list->ObjectMarked(this))wxGetApp().m_marked_list->Add(new_object, true);
-	wxGetApp().DeleteUndoably(this);
+	wxGetApp().Remove(this);
 
 	return true;
 }
@@ -198,10 +198,8 @@ void CCone::OnApplyProperties()
 {
 	CCone* new_object = new CCone(m_pos, m_r1, m_r2, m_height, m_title.c_str(), m_color);
 	new_object->CopyIDsFrom(this);
-	wxGetApp().StartHistory();
-	wxGetApp().AddUndoably(new_object, NULL, NULL);
-	wxGetApp().DeleteUndoably(this);
-	wxGetApp().EndHistory();
+	wxGetApp().Add(new_object, NULL);
+	wxGetApp().Remove(this);
 	wxGetApp().m_marked_list->Clear(true);
 	if(wxGetApp().m_marked_list->ObjectMarked(this))wxGetApp().m_marked_list->Add(new_object, true);
 	wxGetApp().Repaint();
@@ -282,10 +280,8 @@ bool CCone::Stretch(const double *p, const double* shift, void* data)
 	{
 		CCone* new_object = new CCone(new_pos, new_r1, new_r2, new_height, m_title.c_str(), m_color);
 		new_object->CopyIDsFrom(this);
-		wxGetApp().StartHistory();
-		wxGetApp().AddUndoably(new_object, NULL, NULL);
-		wxGetApp().DeleteUndoably(this);
-		wxGetApp().EndHistory();
+		wxGetApp().Add(new_object, NULL);
+		wxGetApp().Remove(this);
 		wxGetApp().m_marked_list->Clear(true);
 		wxGetApp().m_marked_list->Add(new_object, true);
 	}

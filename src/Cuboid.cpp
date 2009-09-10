@@ -50,9 +50,9 @@ bool CCuboid::ModifyByMatrix(const double* m){
 	double new_z = fabs(m_z * scale);
 	CCuboid* new_object = new CCuboid(new_pos, new_x, new_y, new_z, m_title.c_str(), m_color);
 	new_object->CopyIDsFrom(this);
-	wxGetApp().AddUndoably(new_object, Owner(), NULL);
+	Owner()->Add(new_object, NULL);
 	if(wxGetApp().m_marked_list->ObjectMarked(this))wxGetApp().m_marked_list->Add(new_object, true);
-	wxGetApp().DeleteUndoably(this);
+	wxGetApp().Remove(this);
 	return true;
 }
 
@@ -99,10 +99,8 @@ void CCuboid::OnApplyProperties()
 {
 	CCuboid* new_object = new CCuboid(m_pos, m_x, m_y, m_z, m_title.c_str(), m_color);
 	new_object->CopyIDsFrom(this);
-	wxGetApp().StartHistory();
-	wxGetApp().AddUndoably(new_object, NULL, NULL);
-	wxGetApp().DeleteUndoably(this);
-	wxGetApp().EndHistory();
+	wxGetApp().Add(new_object, NULL);
+	wxGetApp().Remove(this);
 	wxGetApp().m_marked_list->Clear(true);
 	if(wxGetApp().m_marked_list->ObjectMarked(this))wxGetApp().m_marked_list->Add(new_object, true);
 	wxGetApp().Repaint();
@@ -158,10 +156,8 @@ bool CCuboid::Stretch(const double *p, const double* shift, void* data)
 	{
 		CCuboid* new_object = new CCuboid(m_pos, m_x, m_y, m_z, m_title.c_str(), m_color);
 		new_object->CopyIDsFrom(this);
-		wxGetApp().StartHistory();
-		wxGetApp().AddUndoably(new_object, NULL, NULL);
-		wxGetApp().DeleteUndoably(this);
-		wxGetApp().EndHistory();
+		wxGetApp().Add(new_object, NULL);
+		wxGetApp().Remove(this);
 		wxGetApp().m_marked_list->Clear(true);
 		wxGetApp().m_marked_list->Add(new_object, true);
 	}

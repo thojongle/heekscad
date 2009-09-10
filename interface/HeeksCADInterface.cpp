@@ -146,7 +146,7 @@ wxString CHeeksCADInterface::GetExeFolder()
 
 void CHeeksCADInterface::AddUndoably(HeeksObj* object, HeeksObj* owner)
 {
-	wxGetApp().AddUndoably(object, owner, NULL);
+	owner->Add(object, NULL);
 }
 
 HeeksObj* CHeeksCADInterface::GetMainObject()
@@ -156,7 +156,7 @@ HeeksObj* CHeeksCADInterface::GetMainObject()
 
 void CHeeksCADInterface::DeleteUndoably(HeeksObj* object)
 {
-	wxGetApp().DeleteUndoably(object);
+	wxGetApp().Remove(object);
 }
 
 const std::list<HeeksObj*>& CHeeksCADInterface::GetMarkedList(void)
@@ -378,17 +378,17 @@ HeeksObj* CHeeksCADInterface::NewSolid(const TopoDS_Solid &solid, const wxChar* 
 } // End NewSolid() method
 
 
-HeeksObj* CHeeksCADInterface::Fuse(const std::list<HeeksObj*> objects)
+HeeksObj* CHeeksCADInterface::Fuse(std::list<HeeksObj*> objects)
 {
 	return CShape::FuseShapes(objects);
 }
 
-HeeksObj* CHeeksCADInterface::Cut(const std::list<HeeksObj*> objects)
+HeeksObj* CHeeksCADInterface::Cut(std::list<HeeksObj*> objects)
 {
 	return CShape::CutShapes(objects);
 }
 
-HeeksObj* CHeeksCADInterface::Common(const std::list<HeeksObj*> objects)
+HeeksObj* CHeeksCADInterface::Common(std::list<HeeksObj*> objects)
 {
 	return CShape::CommonShapes(objects);
 }
@@ -483,9 +483,9 @@ void CHeeksCADInterface::RegisterReadXMLfunction(const char* type_name, HeeksObj
 	wxGetApp().RegisterReadXMLfunction(type_name, read_xml_function);
 }
 
-void CHeeksCADInterface::OpenXMLFile(const wxChar *filepath, bool undoably, HeeksObj* paste_into)
+void CHeeksCADInterface::OpenXMLFile(const wxChar *filepath,HeeksObj* paste_into)
 {
-	wxGetApp().OpenXMLFile(filepath, undoably, paste_into);
+	wxGetApp().OpenXMLFile(filepath, paste_into);
 }
 
 void CHeeksCADInterface::ObjectWriteBaseXML(HeeksObj* object, TiXmlElement* element)
@@ -564,9 +564,9 @@ HeeksObj* CHeeksCADInterface::MakePipe(HeeksObj* spine, HeeksObj* profile)
 	return CreatePipeFromProfile(spine,profile);
 }
 
-bool CHeeksCADInterface::ReOrderSketch(HeeksObj* sketch, SketchOrderType new_order, bool undoably)
+bool CHeeksCADInterface::ReOrderSketch(HeeksObj* sketch, SketchOrderType new_order)
 {
-	return ((CSketch*)sketch)->ReOrderSketch(new_order, undoably);
+	return ((CSketch*)sketch)->ReOrderSketch(new_order);
 }
 
 HeeksObj* CHeeksCADInterface::ExtrudeSketch(HeeksObj* sketch, double height)

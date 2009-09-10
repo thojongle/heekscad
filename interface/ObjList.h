@@ -41,8 +41,10 @@ public:
 	HeeksObj* GetAtIndex(int index);
 	int GetNumChildren();
 	bool CanAdd(HeeksObj* object){return true;}
-	bool Add(HeeksObj* object, HeeksObj* prev_object);
-	void Remove(HeeksObj* object);
+	virtual bool Add(HeeksObj* object, HeeksObj* prev_object);
+	virtual void Add(std::list<HeeksObj*> objects);
+	virtual void Remove(HeeksObj* object);
+	virtual void Remove(std::list<HeeksObj*> objects);
 	void KillGLLists(void);
 	void WriteBaseXML(TiXmlElement *element);
 	void ReadBaseXML(TiXmlElement* element);
